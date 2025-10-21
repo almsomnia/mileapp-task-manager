@@ -1,7 +1,11 @@
+import { resolve, dirname } from "node:path"
+import { fileURLToPath } from "node:url"
 import dotenv from "dotenv"
-dotenv.config({ path: "../../.env" })
+dotenv.config({
+   path: resolve(dirname(fileURLToPath(import.meta.url)), "../../.env"),
+})
 
-import { app } from "./app"
+import app from "./app"
 
 const port = process.env.SERVER_PORT || 3080
 
