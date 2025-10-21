@@ -10,7 +10,7 @@ export const tasks = [
       id: "17474c16-cded-4b42-8b76-9e384058a13d",
       title: "Task 2",
       status: "PROGRESS",
-      created_at: "2025-10-21T07:00:00Z",
-      updated_at: "2025-10-21T07:00:00Z",
+      created_at: "2025-09-11T07:00:00Z",
+      updated_at: "2025-09-11T07:00:00Z",
    },
 ]

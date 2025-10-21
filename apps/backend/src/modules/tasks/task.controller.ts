@@ -2,16 +2,15 @@ import { Request, Response, NextFunction } from "express"
 import { TaskService } from "./task.service"
 import { schema } from "./task.validation"
 import { ZodError } from "zod"
+import { httpResponse } from "@/utils/httpResponse"
 
 export class TaskController {
    private service = new TaskService()
 
    public get = async (req: Request, res: Response, next: NextFunction) => {
       try {
-         const result = await this.service.get()
-         res.json({
-            result,
-         })
+         const { data, meta } = await this.service.get(req.query)
+         res.json(httpResponse(data, meta))
       } catch (e) {
          next(e)
       }
@@ -29,10 +28,8 @@ export class TaskController {
                throw new Error(issues.join("\n"))
             })
 
-         const result = await this.service.create(payload)
-         res.status(201).json({
-            result,
-         })
+         const { data, meta } = await this.service.create(payload)
+         res.status(201).json(httpResponse(data, meta))
       } catch (e) {
          next(e)
       }
@@ -50,10 +47,11 @@ export class TaskController {
                throw new Error(issues.join("\n"))
             })
 
-         const result = await this.service.update(req.params.id, payload)
-         res.status(201).json({
-            result,
-         })
+         const { data, meta } = await this.service.update(
+            req.params.id,
+            payload
+         )
+         res.status(201).json(httpResponse(data, meta))
       } catch (e) {
          next(e)
       }
@@ -61,10 +59,8 @@ export class TaskController {
 
    public delete = async (req: Request, res: Response, next: NextFunction) => {
       try {
-         const result = await this.service.delete(req.params.id)
-         res.json({
-            result
-         })
+         const { data, meta } = await this.service.delete(req.params.id)
+         res.json(httpResponse(data, meta))
       } catch (e) {
          next(e)
       }
