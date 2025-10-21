@@ -1,4 +1,4 @@
-import { createHmac, randomUUID } from "crypto"
+import { randomUUID } from "crypto"
 import { db } from "@/config/db"
 
 export class AuthService {
