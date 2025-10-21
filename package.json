@@ -1,0 +1,15 @@
+{
+   "name": "mile-app",
+   "version": "1.0.0",
+   "description": "",
+   "main": "index.js",
+   "scripts": {
+      "clean:all": "pnpm -r clean && pnpm dlx rimraf node_modules",
+      "server:dev": "pnpm -F backend dev",
+      "web:dev": "pnpm -F frontend dev"
+   },
+   "keywords": [],
+   "author": "",
+   "license": "ISC",
+   "packageManager": "pnpm@10.11.0"
+}
