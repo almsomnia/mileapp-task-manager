@@ -93,7 +93,7 @@ export class TaskService {
       }
       db.tasks = db.tasks.filter((item) => item.id != id)
       return {
-         data: true,
+         data: null,
          meta: {
             message: "Task deleted.",
          },

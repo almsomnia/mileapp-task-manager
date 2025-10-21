@@ -10,7 +10,7 @@ export class TaskController {
    public get = async (req: Request, res: Response, next: NextFunction) => {
       try {
          const { data, meta } = await this.service.get(req.query)
-         res.json(httpResponse(data, meta))
+         res.status(200).json(httpResponse(data, meta))
       } catch (e) {
          next(e)
       }
@@ -18,16 +18,7 @@ export class TaskController {
 
    public create = async (req: Request, res: Response, next: NextFunction) => {
       try {
-         const payload = await schema.create
-            .parseAsync(req.body)
-            .catch((err: ZodError) => {
-               const issues = err.issues.map((i) => {
-                  const path = i.path.join(".")
-                  return `[${path}] ${i.message}`
-               })
-               throw new Error(issues.join("\n"))
-            })
-
+         const payload = await schema.create.parseAsync(req.body)
          const { data, meta } = await this.service.create(payload)
          res.status(201).json(httpResponse(data, meta))
       } catch (e) {
@@ -37,21 +28,12 @@ export class TaskController {
 
    public update = async (req: Request, res: Response, next: NextFunction) => {
       try {
-         const payload = await schema.update
-            .parseAsync(req.body)
-            .catch((err: ZodError) => {
-               const issues = err.issues.map((i) => {
-                  const path = i.path.join(".")
-                  return `[${path}] ${i.message}`
-               })
-               throw new Error(issues.join("\n"))
-            })
-
+         const payload = await schema.update.parseAsync(req.body)
          const { data, meta } = await this.service.update(
             req.params.id,
             payload
          )
-         res.status(201).json(httpResponse(data, meta))
+         res.status(200).json(httpResponse(data, meta))
       } catch (e) {
          next(e)
       }
@@ -60,7 +42,7 @@ export class TaskController {
    public delete = async (req: Request, res: Response, next: NextFunction) => {
       try {
          const { data, meta } = await this.service.delete(req.params.id)
-         res.json(httpResponse(data, meta))
+         res.status(204).json(httpResponse(data, meta))
       } catch (e) {
          next(e)
       }
