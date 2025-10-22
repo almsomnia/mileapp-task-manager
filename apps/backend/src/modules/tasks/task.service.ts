@@ -1,115 +1,43 @@
-import * as uuid from "uuid"
-import { db } from "../../config/db/connection"
 import { InferredSchema as TaskSchema } from "./task.validation"
 import { Request } from "express"
-import { paginate } from "@/utils/paginate"
-import { filter } from "@/utils/filter"
-import { sortByDate } from "@/utils/sort"
-import { HttpError } from "@/config/errors/HttpError"
+import { TaskRepository } from "./task.repository"
 
 export class TaskService {
+   private repo = new TaskRepository()
+
    public get = async (query?: Request["query"]) => {
-      let data = db.tasks
-      const meta: Record<string, any> = {}
-
-      if (query?.sort_key && query.sort_dir) {
-         const sortKey = query.sort_key as keyof (typeof data)[number]
-         const sortDirection = query.sort_dir as "asc" | "desc"
-
-         if (
-            sortKey !== "created_at" &&
-            sortKey !== "updated_at" &&
-            sortKey !== "due_date"
-         ) {
-            throw new HttpError("Invalid sort key", 422)
-         }
-
-         data = sortByDate(data, sortKey, sortDirection)
-         Object.assign(meta, {
-            sort_key: sortKey,
-            sort_direction: sortDirection,
-         })
+      const filter = {
+         sort_key: query?.sort_key,
+         sort_direction: query?.sort_dir,
+         status: query?.status,
+         page: query?.page && Number(query.page ?? 0),
+         per_page: query?.per_page && Number(query.per_page ?? 0),
       }
 
-      if (query?.search_title) {
-         data = filter(data, "title", (value) =>
-            value.toLowerCase().includes(query.search_title as string)
-         )
-      }
-
-      if (query?.status) {
-         data = filter(
-            data,
-            "status",
-            (value) => value == (query.status as string)
-         )
-         Object.assign(meta, { status: query.status })
-      }
-
-      const page = Number(query?.page ?? 0)
-      const perPage = Number(query?.per_page ?? 0)
-
-      const { data: paginated, meta: paginateMeta } = paginate(
-         data,
-         page,
-         perPage
-      )
-      data = paginated
-      Object.assign(meta, paginateMeta)
-
-      return Promise.resolve({
-         data,
-         meta,
-      })
+      const result = this.repo.get(filter)
+      return result
    }
 
    public create = async (payload: TaskSchema) => {
-      const data: (typeof db.tasks)[number] = {
+      const data = {
          ...payload,
-         created_at: new Date().toISOString(),
-         updated_at: new Date().toISOString(),
          due_date: new Date(payload.due_date).toISOString(),
-         id: uuid.v4(),
       }
-      db.tasks.push(data)
-      return Promise.resolve({
-         data,
-         meta: {
-            message: "Task created.",
-         },
-      })
+      const result = this.repo.store(data)
+      return Promise.resolve(result)
    }
 
    public update = async (id: string, payload: TaskSchema) => {
-      const data = db.tasks.find((item) => item.id == id)
-      if (!data) {
-         throw new HttpError("Data not found", 404)
+      const data = {
+         ...payload,
+         due_date: new Date(payload.due_date).toISOString(),
       }
-
-      for (let key in payload) {
-         data[key as keyof typeof data] = payload[key as keyof typeof payload]
-      }
-      data.updated_at = new Date().toISOString()
-
-      return Promise.resolve({
-         data,
-         meta: {
-            message: "Task updated.",
-         },
-      })
+      const result = this.repo.update(id, data)
+      return Promise.resolve(result)
    }
 
    public delete = async (id: string) => {
-      const data = db.tasks.find((item) => item.id == id)
-      if (!data) {
-         throw new HttpError("Data not found", 404)
-      }
-      db.tasks = db.tasks.filter((item) => item.id != id)
-      return {
-         data: null,
-         meta: {
-            message: "Task deleted.",
-         },
-      }
+      const result = this.repo.delete(id)
+      return Promise.resolve(result)
    }
 }

@@ -1,7 +1,6 @@
 import { Request, Response, NextFunction } from "express"
 import { TaskService } from "./task.service"
 import { schema } from "./task.validation"
-import { ZodError } from "zod"
 import { httpResponse } from "@/utils/httpResponse"
 
 export class TaskController {

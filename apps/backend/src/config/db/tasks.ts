@@ -1,12 +1,4 @@
-export type Task = {
-   id: string
-   title: string
-   status: "TODO" | "PROGRESS" | "DONE"
-   created_at: string
-   updated_at: string
-}
-
-export let tasks = [
+export let tasks: Model.Task[] = [
    {
       id: "a8a66c97-7006-4049-a436-0f80176e8eda",
       title: "Task 1",
