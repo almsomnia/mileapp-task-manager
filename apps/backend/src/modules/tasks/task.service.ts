@@ -12,6 +12,21 @@ export class TaskService {
       let data = db.tasks
       const meta: Record<string, any> = {}
 
+      if (query?.sort_key && query.sort_dir) {
+         const sortKey = query.sort_key as keyof (typeof data)[number]
+         const sortDirection = query.sort_dir as "asc" | "desc"
+
+         if (sortKey !== "created_at" && sortKey !== "updated_at") {
+            throw new HttpError("Invalid sort key", 422)
+         }
+
+         data = sortByDate(data, sortKey, sortDirection)
+         Object.assign(meta, {
+            sort_key: sortKey,
+            sort_direction: sortDirection,
+         })
+      }
+
       const page = Number(query?.page ?? 0)
       const perPage = Number(query?.per_page ?? 0)
 
@@ -36,21 +51,6 @@ export class TaskService {
             (value) => value == (query.status as string)
          )
          Object.assign(meta, { status: query.status })
-      }
-
-      if (query?.sort_key && query.sort_dir) {
-         const sortKey = query.sort_key as keyof (typeof data)[number]
-         const sortDirection = query.sort_dir as "asc" | "desc"
-
-         if (sortKey !== "created_at" && sortKey !== "updated_at") {
-            throw new HttpError("Invalid sort key", 422)
-         }
-
-         data = sortByDate(data, sortKey, sortDirection)
-         Object.assign(meta, {
-            sort_key: sortKey,
-            sort_direction: sortDirection,
-         })
       }
 
       return Promise.resolve({
