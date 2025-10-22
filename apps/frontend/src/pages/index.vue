@@ -5,6 +5,7 @@ import { onMounted, ref } from "vue"
 import { Search, X } from "lucide-vue-next"
 import { watchExcludable } from "@/composables/watchExcludable"
 import { watchDebounced } from "@vueuse/core"
+import dayjs from "dayjs"
 
 type TaskMeta = {
    page: number
@@ -115,6 +116,9 @@ onMounted(async () => {
                   </label>
                </div>
             </div>
+         </template>
+         <template #row.updated_at="{ row }">
+            {{ dayjs(row.updated_at).format("MMM DD, YYYY HH:mm") }}
          </template>
       </CoreDataTable>
    </div>
