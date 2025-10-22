@@ -1,12 +1,13 @@
 <script setup lang="ts" generic="T extends Record<string, any>">
 import { onBeforeMount, ref, shallowRef } from "vue"
 import CorePagination from "./CorePagination.vue"
-import { SortAsc, SortDesc } from "lucide-vue-next"
+import { SortAsc, SortDesc, Loader2 } from "lucide-vue-next"
 
 const props = defineProps<{
    rows: T[]
    columns: DataTableColumn<T>[]
    total: number
+   loading?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -58,7 +59,16 @@ function setSortDirection(field: string) {
 <template>
    <div class="flex flex-col gap-4">
       <slot name="header" />
-      <div class="overflow-x-auto">
+      <div class="overflow-x-auto relative">
+         <div
+            class="absolute inset-0 h-full w-full bg-black/24 z-99 flex items-center justify-center backdrop-blur-xs"
+            v-if="props.loading"
+         >
+            <Loader2
+               :size="24"
+               class="stroke-white animate-spin"
+            />
+         </div>
          <table class="table">
             <thead>
                <tr>

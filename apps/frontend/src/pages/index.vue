@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import CoreDataTable from "@/components/core/CoreDataTable.vue"
 import { $api } from "@/utils/api/$api"
-import { h, onMounted, ref } from "vue"
+import { h, onMounted, ref, shallowRef } from "vue"
 import { Search, X, Plus, Edit, Trash } from "lucide-vue-next"
 import { watchExcludable } from "@/composables/watchExcludable"
 import { watchDebounced } from "@vueuse/core"
@@ -17,6 +17,7 @@ type TaskMeta = {
    [x: string]: any
 }
 
+const loading = shallowRef(false)
 const data = ref<Model.Task[]>([])
 const meta = ref<TaskMeta>({ page: 0, per_page: 0, total: 0 })
 const query = ref({
@@ -43,13 +44,18 @@ const columns: DataTableColumn<Model.Task>[] = [
 ]
 
 async function fetchData() {
-   const response = await $api<API.Response<Model.Task[], TaskMeta>>(`/tasks`, {
-      method: "get",
-      query: query.value,
-   })
+   try {
+      loading.value = true
+      const response = await $api<API.Response<Model.Task[], TaskMeta>>(`/tasks`, {
+         method: "get",
+         query: query.value,
+      })
 
-   data.value = response.data
-   meta.value = response.meta
+      data.value = response.data
+      meta.value = response.meta
+   } finally {
+      loading.value = false
+   }
 }
 
 const statusOptions = ["TODO", "PROGRESS", "DONE"]
@@ -113,6 +119,7 @@ function onDelete(data: Model.Task) {
          :rows="data"
          :columns="columns"
          :total="meta.total"
+         :loading="loading"
          v-model:page="query.page"
          v-model:per-page="query.per_page"
          @sort="(value) => onSort(value.field, value.direction)"
