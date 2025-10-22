@@ -27,17 +27,6 @@ export class TaskService {
          })
       }
 
-      const page = Number(query?.page ?? 0)
-      const perPage = Number(query?.per_page ?? 0)
-
-      const { data: paginated, meta: paginateMeta } = paginate(
-         data,
-         page,
-         perPage
-      )
-      data = paginated
-      Object.assign(meta, paginateMeta)
-
       if (query?.search_title) {
          data = filter(data, "title", (value) =>
             value.toLowerCase().includes(query.search_title as string)
@@ -52,6 +41,17 @@ export class TaskService {
          )
          Object.assign(meta, { status: query.status })
       }
+
+      const page = Number(query?.page ?? 0)
+      const perPage = Number(query?.per_page ?? 0)
+
+      const { data: paginated, meta: paginateMeta } = paginate(
+         data,
+         page,
+         perPage
+      )
+      data = paginated
+      Object.assign(meta, paginateMeta)
 
       return Promise.resolve({
          data,

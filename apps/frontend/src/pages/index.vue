@@ -1,11 +1,14 @@
 <script setup lang="ts">
 import CoreDataTable from "@/components/core/CoreDataTable.vue"
 import { $api } from "@/utils/api/$api"
-import { onMounted, ref } from "vue"
-import { Search, X } from "lucide-vue-next"
+import { h, onMounted, ref } from "vue"
+import { Search, X, Plus, Edit, Trash } from "lucide-vue-next"
 import { watchExcludable } from "@/composables/watchExcludable"
 import { watchDebounced } from "@vueuse/core"
 import dayjs from "dayjs"
+import { useAppStore } from "@/stores/app"
+import FormTask from "@/components/forms/FormTask.vue"
+import CoreDialogConfirmBody from "@/components/core/CoreDialogConfirmBody.vue"
 
 type TaskMeta = {
    page: number
@@ -36,6 +39,7 @@ const columns: DataTableColumn<Model.Task>[] = [
    { field: "title", header: "Title" },
    { field: "status", header: "Status" },
    { field: "updated_at", header: "Updated at", sortable: true },
+   { field: "actions", header: "" },
 ]
 
 async function fetchData() {
@@ -63,10 +67,48 @@ function onSort(field: string | null, direction: 1 | -1) {
 onMounted(async () => {
    await fetchData()
 })
+
+const appStore = useAppStore()
+function openForm(data?: Model.Task) {
+   appStore.showDialog(
+      data ? "Update Task" : "New Task",
+      h(FormTask, {
+         data,
+         onSubmit: async (values) => {
+            const endpoint = data ? `/tasks/${data.id}` : `/tasks`
+            const method = data ? "put" : "post"
+
+            const response = await $api<API.Response<Model.Task>>(endpoint, {
+               method,
+               body: values,
+            })
+
+            appStore.closeDialog()
+            await fetchData()
+         },
+      })
+   )
+}
+
+function onDelete(data: Model.Task) {
+   appStore.showDialog(
+      "Confirm Delete Task",
+      h(CoreDialogConfirmBody, {
+         prompt: `Confirm delete ${data.title}?`,
+         onConfirm: async () => {
+            await $api(`/tasks/${data.id}`, {
+               method: "delete",
+            })
+            appStore.closeDialog()
+            await fetchData()
+         },
+      })
+   )
+}
 </script>
 
 <template>
-   <div class="container mx-auto py-4">
+   <div class="container mx-auto xl:max-w-7xl py-4">
       <CoreDataTable
          :rows="data"
          :columns="columns"
@@ -115,10 +157,47 @@ onMounted(async () => {
                      />
                   </label>
                </div>
+               <div class="col-span-2 col-end-13 flex items-center justify-end">
+                  <button
+                     class="btn btn-primary"
+                     @click="openForm()"
+                  >
+                     <Plus
+                        :size="16"
+                        class="-ms-1.5"
+                     />
+                     New Task
+                  </button>
+               </div>
             </div>
+         </template>
+         <template #row.status="{ row }">
+            <span class="badge badge-soft badge-sm" :class="{
+               'badge-neutral': row.status == 'TODO',
+               'badge-info': row.status == 'PROGRESS',
+               'badge-success': row.status == 'DONE'
+            }">
+               {{ row.status }}
+            </span>
          </template>
          <template #row.updated_at="{ row }">
             {{ dayjs(row.updated_at).format("MMM DD, YYYY HH:mm") }}
+         </template>
+         <template #row.actions="{ row }">
+            <div class="flex items-center gap-1">
+               <button
+                  class="btn btn-soft btn-info btn-sm btn-circle"
+                  @click="openForm(row)"
+               >
+                  <Edit :size="12" />
+               </button>
+               <button
+                  class="btn btn-soft btn-error btn-sm btn-circle"
+                  @click="onDelete(row)"
+               >
+                  <Trash :size="12" />
+               </button>
+            </div>
          </template>
       </CoreDataTable>
    </div>
