@@ -3,6 +3,7 @@ import { ref } from "vue"
 import { $authSchema } from "@/utils/validations/auth"
 import { useValidation } from "@/composables/useValidation"
 import { useAuthStore } from "@/stores/auth"
+import { Copy } from "lucide-vue-next"
 
 const form = ref<Record<"email" | "password", string | null>>({
    email: null,
@@ -17,6 +18,16 @@ async function onSubmit() {
    const payload = validate(form.value)
    if (!payload) return
    await authStore.login(payload)
+}
+
+const mockData = {
+   email: "admin@example.com",
+   password: "password",
+}
+
+function assignMockData() {
+   form.value.email = mockData.email
+   form.value.password = mockData.password
 }
 </script>
 
@@ -70,6 +81,34 @@ async function onSubmit() {
                   Login
                </button>
             </form>
+            <div
+               class="border border-gray-300 border-dashed p-4 rounded-md mt-2"
+            >
+               <div class="flex flex-col gap-4">
+                  <div class="flex items-center justify-between">
+                     <h3 class="font-medium text-base">Demo User</h3>
+                     <button class="btn btn-sm btn-ghost btn-circle" @click="assignMockData">
+                        <Copy :size="14" />
+                     </button>
+                  </div>
+                  <div class="flex flex-col">
+                     <span class="text-xs font-medium text-gray-500">
+                        Email
+                     </span>
+                     <span>
+                        {{ mockData.email }}
+                     </span>
+                  </div>
+                  <div class="flex flex-col">
+                     <span class="text-xs font-medium text-gray-500">
+                        Password
+                     </span>
+                     <span>
+                        {{ mockData.password }}
+                     </span>
+                  </div>
+               </div>
+            </div>
          </div>
       </div>
    </div>
