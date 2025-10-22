@@ -21,7 +21,7 @@ async function onSubmit() {
 </script>
 
 <template>
-   <div class="h-screen flex items-center justify-center">
+   <div class="h-screen flex items-center justify-center px-2">
       <div class="card bg-base-100 shadow w-md">
          <div class="card-body">
             <h2 class="card-title">Login</h2>

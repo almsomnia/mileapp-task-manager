@@ -2,9 +2,13 @@
 import CoreDataTable from "@/components/core/CoreDataTable.vue"
 import { $api } from "@/utils/api/$api"
 import { h, onMounted, ref, shallowRef } from "vue"
-import { Search, X, Plus, Edit, Trash } from "lucide-vue-next"
+import { Search, X, Plus, Edit, Trash, Filter } from "lucide-vue-next"
 import { watchExcludable } from "@/composables/watchExcludable"
-import { watchDebounced } from "@vueuse/core"
+import {
+   watchDebounced,
+   useBreakpoints,
+   breakpointsTailwind,
+} from "@vueuse/core"
 import dayjs from "dayjs"
 import { useAppStore } from "@/stores/app"
 import FormTask from "@/components/forms/FormTask.vue"
@@ -37,9 +41,22 @@ watchDebounced(
 )
 
 const columns: DataTableColumn<Model.Task>[] = [
-   { field: "title", header: "Title" },
+   {
+      field: "title",
+      header: "Title",
+      style: {
+         minWidth: "6rem",
+      },
+   },
    { field: "status", header: "Status" },
-   { field: "updated_at", header: "Updated at", sortable: true },
+   {
+      field: "updated_at",
+      header: "Updated at",
+      sortable: true,
+      style: {
+         minWidth: "12rem",
+      },
+   },
    { field: "actions", header: "" },
 ]
 
@@ -116,6 +133,8 @@ function onDelete(data: Model.Task) {
       })
    )
 }
+
+const breakpoints = useBreakpoints(breakpointsTailwind)
 </script>
 
 <template>
@@ -132,44 +151,114 @@ function onDelete(data: Model.Task) {
          >
             <template #header>
                <div class="grid grid-cols-12 gap-4">
-                  <div class="col-span-3">
-                     <label class="input w-full">
-                        <Search :size="16" />
-                        <input
-                           v-model="query.search_title"
-                           type="search"
-                           class="grow"
-                           placeholder="Search"
-                        />
-                     </label>
-                  </div>
-                  <div class="col-span-2">
-                     <label class="select">
-                        <select
-                           class="grow"
-                           v-model="query.status"
-                        >
-                           <option
-                              value=""
-                              disabled
+                  <template v-if="breakpoints.md.value">
+                     <div class="col-span-3">
+                        <label class="input w-full">
+                           <Search :size="16" />
+                           <input
+                              v-model="query.search_title"
+                              type="search"
+                              class="grow"
+                              placeholder="Search"
+                           />
+                        </label>
+                     </div>
+                     <div class="col-span-2">
+                        <label class="select">
+                           <select
+                              class="grow"
+                              v-model="query.status"
                            >
-                              Status
-                           </option>
-                           <option
-                              v-for="option in statusOptions"
-                              :selected="query.status == option"
-                           >
-                              {{ option }}
-                           </option>
-                        </select>
-                        <X
-                           :size="16"
-                           v-if="query.status"
-                           class="cursor-pointer"
-                           @click="query.status = ''"
-                        />
-                     </label>
-                  </div>
+                              <option
+                                 value=""
+                                 disabled
+                              >
+                                 Status
+                              </option>
+                              <option
+                                 v-for="option in statusOptions"
+                                 :selected="query.status == option"
+                              >
+                                 {{ option }}
+                              </option>
+                           </select>
+                           <X
+                              :size="16"
+                              v-if="query.status"
+                              class="cursor-pointer"
+                              @click="query.status = ''"
+                           />
+                        </label>
+                     </div>
+                  </template>
+                  <template v-else>
+                     <div class="col-span-3">
+                        <div class="indicator">
+                           <span
+                              v-if="query.status || query.search_title"
+                              class="indicator-item status status-lg status-secondary"
+                           ></span>
+                           <div class="dropdown">
+                              <div
+                                 tabindex="0"
+                                 role="button"
+                                 class="btn"
+                              >
+                                 <Filter
+                                    class="-ms-1.5"
+                                    :size="16"
+                                 />
+                                 Filter
+                              </div>
+                              <div
+                                 tabindex="0"
+                                 class="dropdown-content card card-sm bg-base-100 z-1 w-64 shadow-lg"
+                              >
+                                 <div class="card-body">
+                                    <div class="flex flex-col gap-4">
+                                       <label class="input w-full">
+                                          <Search :size="16" />
+                                          <input
+                                             v-model="query.search_title"
+                                             type="search"
+                                             class="grow"
+                                             placeholder="Search"
+                                          />
+                                       </label>
+                                       <label class="select">
+                                          <select
+                                             class="grow"
+                                             v-model="query.status"
+                                          >
+                                             <option
+                                                value=""
+                                                disabled
+                                             >
+                                                Status
+                                             </option>
+                                             <option
+                                                v-for="option in statusOptions"
+                                                :selected="
+                                                   query.status == option
+                                                "
+                                             >
+                                                {{ option }}
+                                             </option>
+                                          </select>
+                                          <X
+                                             :size="16"
+                                             v-if="query.status"
+                                             class="cursor-pointer"
+                                             @click="query.status = ''"
+                                          />
+                                       </label>
+                                    </div>
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                  </template>
                   <div
                      class="col-span-2 col-end-13 flex items-center justify-end"
                   >

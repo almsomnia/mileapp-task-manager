@@ -1,5 +1,5 @@
 <script setup lang="ts" generic="T extends Record<string, any>">
-import { onBeforeMount, ref, shallowRef } from "vue"
+import { shallowRef } from "vue"
 import CorePagination from "./CorePagination.vue"
 import { SortAsc, SortDesc, Loader2 } from "lucide-vue-next"
 
@@ -59,9 +59,56 @@ function setSortDirection(field: string) {
 <template>
    <div class="flex flex-col gap-4">
       <slot name="header" />
-      <div class="overflow-x-auto relative">
+      <div class="relative">
+         <div class="overflow-x-auto">
+            <table class="table">
+               <thead>
+                  <tr>
+                     <th
+                        v-for="column in props.columns"
+                        :class="{
+                           'hover:bg-gray-100 cursor-pointer': column.sortable,
+                        }"
+                        :style="column.style"
+                        @click="
+                           column.sortable &&
+                              setSortDirection(column.field as string)
+                        "
+                     >
+                        <div class="inline-flex justify-between w-full">
+                           <span>
+                              {{ column.header }}
+                           </span>
+                           <template v-if="column.sortable">
+                              <component
+                                 :is="sortDirection < 0 ? SortDesc : SortAsc"
+                                 :size="16"
+                                 class="hover:cursor-pointer"
+                                 :class="{
+                                    'opacity-50': sortField != column.field,
+                                 }"
+                              />
+                           </template>
+                        </div>
+                     </th>
+                  </tr>
+               </thead>
+               <tbody>
+                  <tr v-for="(item, index) in props.rows">
+                     <td v-for="col in props.columns">
+                        <slot
+                           :name="`row.${String(col.field)}`"
+                           :row="item"
+                        >
+                           {{ item[col.field as keyof T] }}
+                        </slot>
+                     </td>
+                  </tr>
+               </tbody>
+            </table>
+         </div>
          <div
-            class="absolute inset-0 h-full w-full bg-black/24 z-99 flex items-center justify-center backdrop-blur-xs"
+            class="absolute inset-0 bg-black/24 z-99 flex items-center justify-center backdrop-blur-xs"
             v-if="props.loading"
          >
             <Loader2
@@ -69,50 +116,6 @@ function setSortDirection(field: string) {
                class="stroke-white animate-spin"
             />
          </div>
-         <table class="table">
-            <thead>
-               <tr>
-                  <th
-                     v-for="column in props.columns"
-                     :class="{
-                        'hover:bg-gray-100 cursor-pointer': column.sortable,
-                     }"
-                     @click="
-                        column.sortable &&
-                           setSortDirection(column.field as string)
-                     "
-                  >
-                     <div class="inline-flex justify-between w-full">
-                        <span>
-                           {{ column.header }}
-                        </span>
-                        <template v-if="column.sortable">
-                           <component
-                              :is="sortDirection < 0 ? SortDesc : SortAsc"
-                              :size="16"
-                              class="hover:cursor-pointer"
-                              :class="{
-                                 'opacity-50': sortField != column.field,
-                              }"
-                           />
-                        </template>
-                     </div>
-                  </th>
-               </tr>
-            </thead>
-            <tbody>
-               <tr v-for="(item, index) in props.rows">
-                  <td v-for="col in props.columns">
-                     <slot
-                        :name="`row.${String(col.field)}`"
-                        :row="item"
-                     >
-                        {{ item[col.field as keyof T] }}
-                     </slot>
-                  </td>
-               </tr>
-            </tbody>
-         </table>
       </div>
       <slot
          name="paginator"
