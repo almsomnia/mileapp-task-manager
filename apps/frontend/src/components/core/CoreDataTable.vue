@@ -1,10 +1,16 @@
-<script setup lang="ts" generic="T extends Record<any, any>">
-import CorePagination from './CorePagination.vue'
+<script setup lang="ts" generic="T extends Record<string, any>">
+import { onBeforeMount, ref, shallowRef } from "vue"
+import CorePagination from "./CorePagination.vue"
+import { ChevronDown } from "lucide-vue-next"
 
 const props = defineProps<{
    rows: T[]
    columns: DataTableColumn<T>[]
    total: number
+}>()
+
+const emit = defineEmits<{
+   (e: "sort", values: { field: string | null; direction: -1 | 1 }): void
 }>()
 
 const page = defineModel<number>("page", {
@@ -15,32 +21,97 @@ const perPage = defineModel<number>("perPage", {
    required: false,
    default: 10,
 })
+
+const sortField = shallowRef<string | null>(null)
+const sortDirection = shallowRef<1 | -1>(1) // 1: asc, -1: desc
+function setSortDirection(field: string) {
+   if (!sortField.value) {
+      sortField.value = field
+      sortDirection.value = 1
+      emit("sort", {
+         field: sortField.value,
+         direction: sortDirection.value,
+      })
+      return
+   }
+
+   if (sortField.value == field) {
+      if (sortDirection.value < 0) {
+         sortField.value = null
+         sortDirection.value = 1
+         emit("sort", {
+            field: sortField.value,
+            direction: sortDirection.value,
+         })
+         return
+      }
+
+      sortDirection.value = -1
+      emit("sort", {
+         field: sortField.value,
+         direction: sortDirection.value,
+      })
+   }
+}
 </script>
 
 <template>
-   <div class="overflow-x-auto flex flex-col gap-4">
-      <table class="table">
-         <thead>
-            <tr>
-               <th v-for="column in props.columns">
-                  {{ column.header }}
-               </th>
-            </tr>
-         </thead>
-         <tbody>
-            <tr v-for="(item, index) in props.rows">
-               <td v-for="col in props.columns">
-                  {{ item[col.field as keyof T] }}
-               </td>
-            </tr>
-         </tbody>
-      </table>
-      <div class="flex items-center justify-center">
-         <CorePagination
-            v-model:page="page"
-            :perPage="perPage"
-            :total="props.total"
-         />
+   <div class="flex flex-col gap-4">
+      <slot name="header" />
+      <div class="overflow-x-auto">
+         <table class="table">
+            <thead>
+               <tr>
+                  <th v-for="column in props.columns">
+                     <div class="inline-flex justify-between w-full">
+                        <span>
+                           {{ column.header }}
+                        </span>
+                        <template v-if="column.sortable">
+                           <ChevronDown
+                              :size="16"
+                              class="hover:cursor-pointer"
+                              :stroke-width="column.field == sortField ? 4 : 2"
+                              :class="{
+                                 'rotate-180':
+                                    column.field == sortField &&
+                                    sortDirection < 0,
+                              }"
+                              @click="setSortDirection(column.field as string)"
+                           />
+                        </template>
+                     </div>
+                  </th>
+               </tr>
+            </thead>
+            <tbody>
+               <tr v-for="(item, index) in props.rows">
+                  <td v-for="col in props.columns">
+                     <slot
+                        :name="`row.${String(col.field)}`"
+                        :row="item"
+                     >
+                        {{ item[col.field as keyof T] }}
+                     </slot>
+                  </td>
+               </tr>
+            </tbody>
+         </table>
       </div>
+      <slot
+         name="paginator"
+         :page="page"
+         :perPage="perPage"
+         :total="props.total"
+         :rows="rows"
+      >
+         <div class="flex items-center justify-end">
+            <CorePagination
+               v-model:page="page"
+               :perPage="perPage"
+               :total="props.total"
+            />
+         </div>
+      </slot>
    </div>
 </template>
