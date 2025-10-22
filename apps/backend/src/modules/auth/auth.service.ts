@@ -1,4 +1,4 @@
-import { randomUUID } from "crypto"
+import * as uuid from "uuid"
 import { db } from "@/config/db"
 
 export class AuthService {
@@ -7,7 +7,7 @@ export class AuthService {
 
       return Promise.resolve({
          user: user,
-         token: randomUUID().replaceAll("-", ""),
+         token: uuid.v4().replaceAll("-", ""),
       })
    }
 }

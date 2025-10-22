@@ -1,4 +1,4 @@
-import { randomUUID } from "crypto"
+import * as uuid from "uuid"
 import { db } from "../../config/db"
 import { InferredSchema as TaskSchema } from "./task.validation"
 import { Request } from "express"
@@ -56,7 +56,7 @@ export class TaskService {
          ...payload,
          created_at: new Date().toISOString(),
          updated_at: new Date().toISOString(),
-         id: randomUUID(),
+         id: uuid.v4(),
       }
       db.tasks.push(data)
       return Promise.resolve({
