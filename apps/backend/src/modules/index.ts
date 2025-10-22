@@ -7,7 +7,15 @@ type ModuleRoute = {
    router: Router
 }
 
-export const moduleRoutes: ModuleRoute[] = [
-   { path: "/auth", router: authRouter  },
-   { path: "/tasks", router: taskRouter }
+const moduleRoutes: ModuleRoute[] = [
+   { path: "/auth", router: authRouter },
+   { path: "/tasks", router: taskRouter },
 ]
+
+const router = Router()
+
+moduleRoutes.forEach((module) => {
+   router.use(module.path, module.router)
+})
+
+export { router as moduleRouter }
