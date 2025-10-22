@@ -1,4 +1,5 @@
 import Login from "@/pages/auth/login.vue"
+import { useAuthStore } from "@/stores/auth"
 import type { RouteRecordRaw } from "vue-router"
 
 export const routes: RouteRecordRaw[] = [
@@ -7,7 +8,15 @@ export const routes: RouteRecordRaw[] = [
       children: [
          {
             path: "login",
-            component: Login
+            component: Login,
+            beforeEnter: (to, from) => {
+               const authStore = useAuthStore()
+               if (authStore.token) {
+                  return {
+                     path: "/"
+                  }
+               }
+            }
          }
       ]
    }
