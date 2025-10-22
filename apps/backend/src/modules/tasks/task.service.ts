@@ -5,44 +5,52 @@ import { Request } from "express"
 import { paginate } from "@/utils/paginate"
 import { filter } from "@/utils/filter"
 import { sortByDate } from "@/utils/sort"
+import { HttpError } from "@/config/errors/HttpError"
 
 export class TaskService {
    public get = async (query?: Request["query"]) => {
       let data = db.tasks
       const meta: Record<string, any> = {}
 
-      if (query) {
-         if (query.page && query.per_page) {
-            const page = Number(query.page)
-            const perPage = Number(query.per_page)
-            data = paginate(data, page, perPage)
-            Object.assign(meta, { page, per_page: perPage })
+      const page = Number(query?.page ?? 0)
+      const perPage = Number(query?.per_page ?? 0)
+
+      const { data: paginated, meta: paginateMeta } = paginate(
+         data,
+         page,
+         perPage
+      )
+      data = paginated
+      Object.assign(meta, paginateMeta)
+
+      if (query?.search_title) {
+         data = filter(data, "title", (value) =>
+            value.toLowerCase().includes(query.search_title as string)
+         )
+      }
+
+      if (query?.status) {
+         data = filter(
+            data,
+            "status",
+            (value) => value == (query.status as string)
+         )
+         Object.assign(meta, { status: query.status })
+      }
+
+      if (query?.sort_key && query.sort_dir) {
+         const sortKey = query.sort_key as keyof (typeof data)[number]
+         const sortDirection = query.sort_dir as "asc" | "desc"
+
+         if (sortKey !== "created_at" && sortKey !== "updated_at") {
+            throw new HttpError("Invalid sort key", 422)
          }
 
-         if (query.search_title) {
-            data = filter(data, "title", (value) =>
-               value.toLowerCase().includes(query.search_title as string)
-            )
-         }
-
-         if (query.status) {
-            data = filter(
-               data,
-               "status",
-               (value) => value == (query.status as string)
-            )
-         }
-
-         if (query.sort_key && query.sort_dir) {
-            const sortKey = query.sort_key as keyof (typeof data)[number]
-            const sortDirection = query.sort_dir as "asc" | "desc"
-
-            if (sortKey !== "created_at" && sortKey !== "updated_at") {
-               throw new Error("Invalid sort key")
-            }
-
-            data = sortByDate(data, sortKey, sortDirection)
-         }
+         data = sortByDate(data, sortKey, sortDirection)
+         Object.assign(meta, {
+            sort_key: sortKey,
+            sort_direction: sortDirection,
+         })
       }
 
       return Promise.resolve({
@@ -70,7 +78,7 @@ export class TaskService {
    public update = async (id: string, payload: TaskSchema) => {
       const data = db.tasks.find((item) => item.id == id)
       if (!data) {
-         throw new Error("Data not found")
+         throw new HttpError("Data not found", 404)
       }
 
       for (let key in payload) {
@@ -89,7 +97,7 @@ export class TaskService {
    public delete = async (id: string) => {
       const data = db.tasks.find((item) => item.id == id)
       if (!data) {
-         throw new Error("Data not found")
+         throw new HttpError("Data not found", 404)
       }
       db.tasks = db.tasks.filter((item) => item.id != id)
       return {

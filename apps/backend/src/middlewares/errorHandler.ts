@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express"
 import { httpResponse } from "@/utils/httpResponse"
 import { ZodError } from "zod"
+import { HttpError } from "@/config/errors/HttpError"
 
 export function errorHandler(
    err: Error,
@@ -20,6 +21,10 @@ export function errorHandler(
          return `[${path}] ${i.message}`
       })
       message = issues.join("\n")
+   }
+
+   if (err instanceof HttpError) {
+      status = err.statusCode
    }
 
    res.status(status).json(

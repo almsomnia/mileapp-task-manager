@@ -42,7 +42,7 @@ export class TaskController {
    public delete = async (req: Request, res: Response, next: NextFunction) => {
       try {
          const { data, meta } = await this.service.delete(req.params.id)
-         res.status(204).json(httpResponse(data, meta))
+         res.status(204).send()
       } catch (e) {
          next(e)
       }
