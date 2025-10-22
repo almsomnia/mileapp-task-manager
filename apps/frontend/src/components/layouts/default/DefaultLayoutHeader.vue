@@ -1,18 +1,12 @@
 <script setup lang="ts">
 import { User, LogOut } from "lucide-vue-next"
 import { useAuthStore } from "@/stores/auth"
-import { useRouter } from "vue-router"
-import { nextTick } from "vue"
 
 const authStore = useAuthStore()
-const router = useRouter()
 
-function onLogout() {
-   authStore.user = null
-   authStore.token = null
-   ;(document.activeElement as any)?.blur()
-   nextTick(() => {
-      router.push("/auth/login")
+async function onLogout() {
+   await authStore.logout(() => {
+      ;(document.activeElement as any)?.blur()
    })
 }
 </script>
@@ -46,7 +40,10 @@ function onLogout() {
                      @click="onLogout"
                   >
                      <a>
-                        <LogOut :size="14" class="-ms-1" />
+                        <LogOut
+                           :size="14"
+                           class="-ms-1"
+                        />
                         Logout
                      </a>
                   </li>

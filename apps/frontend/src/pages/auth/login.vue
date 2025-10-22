@@ -2,9 +2,7 @@
 import { ref } from "vue"
 import { $authSchema } from "@/utils/validations/auth"
 import { useValidation } from "@/composables/useValidation"
-import { $api } from "@/utils/api/$api"
 import { useAuthStore } from "@/stores/auth"
-import { useRouter } from "vue-router"
 
 const form = ref<Record<"email" | "password", string | null>>({
    email: null,
@@ -14,24 +12,11 @@ const form = ref<Record<"email" | "password", string | null>>({
 const { errors, validate } = useValidation($authSchema().login)
 
 const authStore = useAuthStore()
-const router = useRouter()
 
 async function onSubmit() {
    const payload = validate(form.value)
    if (!payload) return
-
-   const response = await $api<API.Response<Model.User, { token: string }>>(
-      "/auth/login",
-      {
-         method: "post",
-         body: payload,
-      }
-   )
-
-   authStore.token = response.meta.token
-   authStore.user = response.data
-
-   await router.push("/")
+   await authStore.login(payload)
 }
 </script>
 
