@@ -97,6 +97,7 @@ describe("Mock Task API", () => {
          const payload = {
             title: "New Task",
             status: "TODO",
+            due_date: "2025-11-01"
          }
 
          const response = await request(app).post("/tasks").send(payload)
@@ -105,6 +106,7 @@ describe("Mock Task API", () => {
          expect(response.statusCode).toBe(201)
          expect(body.data.title).toBe("New Task")
          expect(body.data.status).toBe("TODO")
+         expect(new Date(body.data.due_date).toISOString()).toBe(new Date(payload.due_date).toISOString())
          expect(body.meta.message).toBe("Task created.")
       })
 
@@ -127,6 +129,7 @@ describe("Mock Task API", () => {
          const payload = {
             title: "Task Updated",
             status: "DONE",
+            due_date: "2026-01-01"
          }
 
          const response = await request(app)
@@ -137,13 +140,15 @@ describe("Mock Task API", () => {
          expect(response.statusCode).toBe(200)
          expect(body.data.title).toBe("Task Updated")
          expect(body.data.status).toBe("DONE")
+         expect(new Date(body.data.due_date).toISOString()).toBe(new Date(payload.due_date).toISOString())
          expect(body.meta.message).toBe("Task updated.")
       })
 
       it("should return error when validation fails", async () => {
          const payload = {
             name: "Invalid key",
-            status: "INVALID"
+            status: "INVALID",
+            due_date: null
          }
 
          const response = await request(app).put(`/tasks/${staticUuid}`).send(payload)
