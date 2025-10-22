@@ -1,7 +1,7 @@
 <script setup lang="ts" generic="T extends Record<string, any>">
 import { onBeforeMount, ref, shallowRef } from "vue"
 import CorePagination from "./CorePagination.vue"
-import { ChevronDown } from "lucide-vue-next"
+import { SortAsc, SortDesc } from "lucide-vue-next"
 
 const props = defineProps<{
    rows: T[]
@@ -62,22 +62,28 @@ function setSortDirection(field: string) {
          <table class="table">
             <thead>
                <tr>
-                  <th v-for="column in props.columns">
+                  <th
+                     v-for="column in props.columns"
+                     :class="{
+                        'hover:bg-gray-100 cursor-pointer': column.sortable,
+                     }"
+                     @click="
+                        column.sortable &&
+                           setSortDirection(column.field as string)
+                     "
+                  >
                      <div class="inline-flex justify-between w-full">
                         <span>
                            {{ column.header }}
                         </span>
                         <template v-if="column.sortable">
-                           <ChevronDown
+                           <component
+                              :is="sortDirection < 0 ? SortDesc : SortAsc"
                               :size="16"
                               class="hover:cursor-pointer"
-                              :stroke-width="column.field == sortField ? 4 : 2"
                               :class="{
-                                 'rotate-180':
-                                    column.field == sortField &&
-                                    sortDirection < 0,
+                                 'opacity-50': sortField != column.field,
                               }"
-                              @click="setSortDirection(column.field as string)"
                            />
                         </template>
                      </div>
