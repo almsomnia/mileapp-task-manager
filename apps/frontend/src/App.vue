@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import CoreDialog from './components/core/CoreDialog.vue'
-import { useAppStore } from './stores/app'
+import CoreDialog from "./components/core/CoreDialog.vue"
+import CoreToast from "./components/core/CoreToast.vue"
+import { useAppStore } from "./stores/app"
 
 const appStore = useAppStore()
 </script>
@@ -15,5 +16,6 @@ const appStore = useAppStore()
       >
          <component :is="appStore.dialog.component" />
       </CoreDialog>
+      <CoreToast :items="appStore.toasts" />
    </main>
 </template>

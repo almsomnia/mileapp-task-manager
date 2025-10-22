@@ -89,6 +89,7 @@ function openForm(data?: Model.Task) {
                body: values,
             })
 
+            appStore.notify(response.meta.message, "success")
             appStore.closeDialog()
             await fetchData()
          },
@@ -105,6 +106,7 @@ function onDelete(data: Model.Task) {
             await $api(`/tasks/${data.id}`, {
                method: "delete",
             })
+            appStore.notify("Task deleted", "info")
             appStore.closeDialog()
             await fetchData()
          },
