@@ -1,12 +1,38 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref } from "vue"
+import { $authSchema } from "@/utils/validations/auth"
+import { useValidation } from "@/composables/useValidation"
+import { $api } from "@/utils/api/$api"
+import { useAuthStore } from "@/stores/auth"
+import { useRouter } from "vue-router"
 
-const form = ref({
+const form = ref<Record<"email" | "password", string | null>>({
    email: null,
-   password: null
+   password: null,
 })
 
-async function onSubmit() {}
+const { errors, validate } = useValidation($authSchema().login)
+
+const authStore = useAuthStore()
+const router = useRouter()
+
+async function onSubmit() {
+   const payload = validate(form.value)
+   if (!payload) return
+
+   const response = await $api<API.Response<Model.User, { token: string }>>(
+      "/auth/login",
+      {
+         method: "post",
+         body: payload,
+      }
+   )
+
+   authStore.token = response.meta.token
+   authStore.user = response.data
+
+   await router.push("/")
+}
 </script>
 
 <template>
@@ -18,18 +44,40 @@ async function onSubmit() {}
                @submit.prevent="onSubmit"
                class="flex flex-col gap-4"
             >
-               <input
-                  v-model="form.email"
-                  class="input w-full"
-                  placeholder="Email"
-                  type="text"
-               />
-               <input
-                  v-model="form.password"
-                  class="input w-full"
-                  placeholder="Password"
-                  type="password"
-               />
+               <fieldset class="fieldset">
+                  <input
+                     v-model="form.email"
+                     class="input w-full"
+                     :class="{
+                        'input-error text-error': !!errors.email,
+                     }"
+                     placeholder="Email"
+                     type="text"
+                  />
+                  <p
+                     v-if="errors.email"
+                     class="label text-error"
+                  >
+                     {{ errors.email }}
+                  </p>
+               </fieldset>
+               <fieldset class="fieldset">
+                  <input
+                     v-model="form.password"
+                     class="input w-full"
+                     :class="{
+                        'input-error text-error': !!errors.password,
+                     }"
+                     placeholder="Password"
+                     type="password"
+                  />
+                  <p
+                     v-if="errors.password"
+                     class="label text-error"
+                  >
+                     {{ errors.password }}
+                  </p>
+               </fieldset>
                <button
                   type="submit"
                   class="btn btn-primary"
