@@ -1,17 +1,20 @@
 export const paginate = <T>(data: T[], page: number, perPage: number) => {
-   let _perPage = perPage > 0 && perPage || data.length
-   let _page = page > 0 && page || 1
-   const safeLimit = Math.max(0, _perPage)
-   const safeOffset = Math.max(0, _page - 1)
+   const total = data.length
+   perPage = perPage > 0 && perPage || total
+   const totalPages = Math.ceil(total / perPage)
 
-   const startIndex = safeOffset
-   const endIndex = startIndex + safeLimit
+   const currentPage = Math.min(Math.max(page, 1), totalPages)
+
+   const start = (currentPage - 1) * perPage
+   const end = start + perPage
+   const items = data.slice(start, end)
 
    return {
-      data: data.slice(startIndex, endIndex),
+      data: items,
       meta: {
-         page: _page,
-         per_page: _perPage
+         page: currentPage,
+         per_page: perPage,
+         total
       }
    }
 }
