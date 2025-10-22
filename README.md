@@ -2,6 +2,45 @@
 
 A mock task list app built using Vue.js & Express.js
 
+## Prerequisites
+
+- Node.js v20
+
+- pnpm v10
+
+## Setup
+
+1. Install dependencies
+   ```sh
+   pnpm install
+   ```
+
+2. Copy `.env.example` to `.env`
+
+3. Run development server
+   ```sh
+   # Running backend server
+   pnpm server:dev
+
+   # Running frontend server
+   pnpm web:dev
+   ```
+
+## Available Scripts
+
+In addition to the development server scripts mentioned above, here are other available scripts:
+
+```sh
+# Run backend test case
+pnpm server:test
+
+# Remove all `node_modules` dir
+pnpm clean:all
+
+# Build frontend app
+pnpm web:build
+```
+
 ## Design Architecture
 
 This project is using a monorepo structure powered by pnpm workspace, containing two main apps:
@@ -10,7 +49,7 @@ This project is using a monorepo structure powered by pnpm workspace, containing
 
 - **Frontend**: UI built with Vue 3 + TailwindCSS, using modular component structure.
 
-Shared **type definitions** are declared in the root `/types` directory and extended by both frontend and backend.
+> Shared **type definitions** are declared in the root `/types` directory and extended by both frontend and backend.
 
 ## Design Decisions
 

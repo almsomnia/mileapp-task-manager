@@ -5,11 +5,17 @@
    "main": "index.js",
    "scripts": {
       "clean:all": "pnpm -r clean && pnpm dlx rimraf node_modules",
+      "web:dev": "pnpm -F frontend dev",
+      "web:build": "pnpm -F frontend build",
       "server:dev": "pnpm -F backend dev",
-      "web:dev": "pnpm -F frontend dev"
+      "server:test": "pnpm -F backend test"
    },
    "keywords": [],
    "author": "",
    "license": "ISC",
-   "packageManager": "pnpm@10.11.0"
+   "packageManager": "pnpm@10.11.0",
+   "engines": {
+      "node": "^20",
+      "pnpm": "^10"
+   }
 }
