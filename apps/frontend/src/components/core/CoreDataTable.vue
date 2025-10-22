@@ -25,34 +25,50 @@ const perPage = defineModel<number>("perPage", {
 
 const sortField = shallowRef<string | null>(null)
 const sortDirection = shallowRef<1 | -1>(1) // 1: asc, -1: desc
-function setSortDirection(field: string) {
-   if (!sortField.value) {
-      sortField.value = field
-      sortDirection.value = 1
-      emit("sort", {
-         field: sortField.value,
-         direction: sortDirection.value,
-      })
-      return
-   }
 
-   if (sortField.value == field) {
-      if (sortDirection.value < 0) {
+/**
+ * Column sorting strategy handler
+ * Sorting cycle: ASC -> DESC -> unset
+ *
+ * @param field Field to sort
+ *
+ * @emits sort
+ */
+function setSortingStrategy(field: string) {
+   switch (true) {
+      /**
+       * Case filter strategy is unset OR switching field to sort
+       * assign the field and set direction to ASC
+       */
+      case sortField.value !== field:
+         sortField.value = field
+         sortDirection.value = 1
+         break
+
+      /**
+       * Case setting same field and current direction is ASC
+       * set direction to DESC
+       */
+      case sortDirection.value == 1:
+         sortDirection.value = -1
+         break
+
+      /**
+       * Case setting same field and current direction is DESC
+       * Reset sorting strategy
+       */
+      default:
          sortField.value = null
          sortDirection.value = 1
-         emit("sort", {
-            field: sortField.value,
-            direction: sortDirection.value,
-         })
-         return
-      }
-
-      sortDirection.value = -1
-      emit("sort", {
-         field: sortField.value,
-         direction: sortDirection.value,
-      })
    }
+
+   /**
+    * Emit sorting strategy to further handled
+    */
+   emit("sort", {
+      field: sortField.value,
+      direction: sortDirection.value,
+   })
 }
 </script>
 
@@ -72,7 +88,7 @@ function setSortDirection(field: string) {
                         :style="column.style"
                         @click="
                            column.sortable &&
-                              setSortDirection(column.field as string)
+                              setSortingStrategy(column.field as string)
                         "
                      >
                         <div class="inline-flex justify-between w-full">
@@ -81,7 +97,12 @@ function setSortDirection(field: string) {
                            </span>
                            <template v-if="column.sortable">
                               <component
-                                 :is="sortDirection < 0 ? SortDesc : SortAsc"
+                                 :is="
+                                    column.field == sortField &&
+                                    sortDirection < 0
+                                       ? SortDesc
+                                       : SortAsc
+                                 "
                                  :size="16"
                                  class="hover:cursor-pointer"
                                  :class="{
