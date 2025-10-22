@@ -1,4 +1,12 @@
-export const tasks = [
+export type Task = {
+   id: string
+   title: string
+   status: "TODO" | "PROGRESS" | "DONE"
+   created_at: string
+   updated_at: string
+}
+
+export let tasks = [
    {
       id: "a8a66c97-7006-4049-a436-0f80176e8eda",
       title: "Task 1",
@@ -14,3 +22,7 @@ export const tasks = [
       updated_at: "2025-09-11T07:00:00Z",
    },
 ]
+
+export const $reset = () => {
+   tasks = []
+}
