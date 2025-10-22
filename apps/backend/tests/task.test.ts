@@ -38,10 +38,13 @@ describe("Mock Task API", () => {
    })
 
    const staticUuid = "a8a66c97-7006-4049-a436-0f80176e8eda"
+   const staticAuthToken = "Bearer 23510de5b5594ef9ba6142e9a984cc01"
 
-   describe("GET /tasks", () => {
+   describe("GET /api/tasks", () => {
       it("should return an array of tasks", async () => {
-         const response = await request(app).get("/tasks")
+         const response = await request(app)
+            .get("/api/tasks")
+            .set("Authorization", staticAuthToken)
          const body = response.body
 
          expect(response.statusCode).toBe(200)
@@ -56,7 +59,10 @@ describe("Mock Task API", () => {
             per_page: -1,
          }
 
-         const response = await request(app).get("/tasks").query(query)
+         const response = await request(app)
+            .get("/api/tasks")
+            .query(query)
+            .set("Authorization", staticAuthToken)
          const body = response.body
 
          expect(response.statusCode).toBe(200)
@@ -69,7 +75,10 @@ describe("Mock Task API", () => {
             status: "TODO",
          }
 
-         const response = await request(app).get("/tasks").query(query)
+         const response = await request(app)
+            .get("/api/tasks")
+            .query(query)
+            .set("Authorization", staticAuthToken)
          const body = response.body
 
          expect(response.statusCode).toBe(200)
@@ -81,10 +90,13 @@ describe("Mock Task API", () => {
       it("should return error when sorting keys are invalid", async () => {
          const query = {
             sort_key: "invalid_key",
-            sort_dir: "invalid_dir"
+            sort_dir: "invalid_dir",
          }
 
-         const response = await request(app).get("/tasks").query(query)
+         const response = await request(app)
+            .get("/api/tasks")
+            .query(query)
+            .set("Authorization", staticAuthToken)
          const body = response.body
 
          expect(response.statusCode).toBe(422)
@@ -92,31 +104,39 @@ describe("Mock Task API", () => {
       })
    })
 
-   describe("POST /tasks", () => {
+   describe("POST /api/tasks", () => {
       it("should create a new task", async () => {
          const payload = {
             title: "New Task",
             status: "TODO",
-            due_date: "2025-11-01"
+            due_date: "2025-11-01",
          }
 
-         const response = await request(app).post("/tasks").send(payload)
+         const response = await request(app)
+            .post("/api/tasks")
+            .send(payload)
+            .set("Authorization", staticAuthToken)
          const body = response.body
 
          expect(response.statusCode).toBe(201)
          expect(body.data.title).toBe("New Task")
          expect(body.data.status).toBe("TODO")
-         expect(new Date(body.data.due_date).toISOString()).toBe(new Date(payload.due_date).toISOString())
+         expect(new Date(body.data.due_date).toISOString()).toBe(
+            new Date(payload.due_date).toISOString()
+         )
          expect(body.meta.message).toBe("Task created.")
       })
 
       it("should return error when validation fails", async () => {
          const payload = {
             name: "Invalid key",
-            status: "INVALID"
+            status: "INVALID",
          }
 
-         const response = await request(app).post("/tasks").send(payload)
+         const response = await request(app)
+            .post("/api/tasks")
+            .send(payload)
+            .set("Authorization", staticAuthToken)
          const body = response.body
 
          expect(response.statusCode).toBe(422)
@@ -124,23 +144,26 @@ describe("Mock Task API", () => {
       })
    })
 
-   describe("PUT /tasks/:id", () => {
+   describe("PUT /api/tasks/:id", () => {
       it("should update a task", async () => {
          const payload = {
             title: "Task Updated",
             status: "DONE",
-            due_date: "2026-01-01"
+            due_date: "2026-01-01",
          }
 
          const response = await request(app)
-            .put(`/tasks/${staticUuid}`)
+            .put(`/api/tasks/${staticUuid}`)
             .send(payload)
+            .set("Authorization", staticAuthToken)
          const body = response.body
 
          expect(response.statusCode).toBe(200)
          expect(body.data.title).toBe("Task Updated")
          expect(body.data.status).toBe("DONE")
-         expect(new Date(body.data.due_date).toISOString()).toBe(new Date(payload.due_date).toISOString())
+         expect(new Date(body.data.due_date).toISOString()).toBe(
+            new Date(payload.due_date).toISOString()
+         )
          expect(body.meta.message).toBe("Task updated.")
       })
 
@@ -148,10 +171,13 @@ describe("Mock Task API", () => {
          const payload = {
             name: "Invalid key",
             status: "INVALID",
-            due_date: null
+            due_date: null,
          }
 
-         const response = await request(app).put(`/tasks/${staticUuid}`).send(payload)
+         const response = await request(app)
+            .put(`/api/tasks/${staticUuid}`)
+            .send(payload)
+            .set("Authorization", staticAuthToken)
          const body = response.body
 
          expect(response.statusCode).toBe(422)
@@ -159,17 +185,35 @@ describe("Mock Task API", () => {
       })
    })
 
-   describe("DELETE /tasks/:id", () => {
+   describe("DELETE /api/tasks/:id", () => {
       it("should delete a task", async () => {
-         const response = await request(app).delete(`/tasks/${staticUuid}`)
+         const response = await request(app)
+            .delete(`/api/tasks/${staticUuid}`)
+            .set("Authorization", staticAuthToken)
 
          expect(response.statusCode).toBe(204)
       })
 
       it("should return error when file not found", async () => {
-         const response = await request(app).delete(`/tasks/not-an-uuid`)
+         const response = await request(app)
+            .delete(`/api/tasks/not-an-uuid`)
+            .set("Authorization", staticAuthToken)
 
          expect(response.statusCode).toBe(404)
+      })
+   })
+
+   describe("Authorization layer", () => {
+      it("should pass validation when token provided", async () => {
+         const response = await request(app)
+            .get("/api/tasks")
+            .set("Authorization", staticAuthToken)
+         expect(response.statusCode).toBeLessThan(400)
+      })
+
+      it("should return error when no token provided", async () => {
+         const response = await request(app).get("/api/tasks")
+         expect(response.statusCode).toBe(401)
       })
    })
 })
