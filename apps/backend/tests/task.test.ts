@@ -1,5 +1,5 @@
 import { jest } from "@jest/globals"
-import { dbCtrl, db } from "../src/config/db"
+import { dbCtrl } from "../src/config/db/connection"
 import request from "supertest"
 import app from "../src/app"
 

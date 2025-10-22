@@ -1,5 +1,5 @@
 import * as uuid from "uuid"
-import { db } from "../../config/db"
+import { db } from "../../config/db/connection"
 import { InferredSchema as TaskSchema } from "./task.validation"
 import { Request } from "express"
 import { paginate } from "@/utils/paginate"
@@ -16,7 +16,11 @@ export class TaskService {
          const sortKey = query.sort_key as keyof (typeof data)[number]
          const sortDirection = query.sort_dir as "asc" | "desc"
 
-         if (sortKey !== "created_at" && sortKey !== "updated_at") {
+         if (
+            sortKey !== "created_at" &&
+            sortKey !== "updated_at" &&
+            sortKey !== "due_date"
+         ) {
             throw new HttpError("Invalid sort key", 422)
          }
 
@@ -64,6 +68,7 @@ export class TaskService {
          ...payload,
          created_at: new Date().toISOString(),
          updated_at: new Date().toISOString(),
+         due_date: new Date(payload.due_date).toISOString(),
          id: uuid.v4(),
       }
       db.tasks.push(data)

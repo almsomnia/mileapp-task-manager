@@ -50,8 +50,16 @@ const columns: DataTableColumn<Model.Task>[] = [
    },
    { field: "status", header: "Status" },
    {
-      field: "updated_at",
-      header: "Updated at",
+      field: "due_date",
+      header: "Due Date",
+      sortable: true,
+      style: {
+         minWidth: "12rem",
+      },
+   },
+   {
+      field: "created_at",
+      header: "Created at",
       sortable: true,
       style: {
          minWidth: "12rem",
@@ -287,8 +295,11 @@ const breakpoints = useBreakpoints(breakpointsTailwind)
                   {{ row.status }}
                </span>
             </template>
-            <template #row.updated_at="{ row }">
-               {{ dayjs(row.updated_at).format("MMM DD, YYYY HH:mm") }}
+            <template #row.due_date="{ row }">
+               {{ dayjs(row.due_date).format("DD MMM YYYY HH:mm") }}
+            </template>
+            <template #row.created_at="{ row }">
+               {{ dayjs(row.created_at).format("DD MMM YYYY HH:mm") }}
             </template>
             <template #row.actions="{ row }">
                <div class="flex items-center gap-1">

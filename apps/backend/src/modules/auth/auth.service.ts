@@ -1,5 +1,5 @@
 import * as uuid from "uuid"
-import { db } from "@/config/db"
+import { db } from "@/config/db/connection"
 
 export class AuthService {
    public async login(payload: any) {
