@@ -1,9 +1,12 @@
 import { resolve, dirname } from "node:path"
 import { fileURLToPath } from "node:url"
 import dotenv from "dotenv"
-dotenv.config({
-   path: resolve(dirname(fileURLToPath(import.meta.url)), "../../.env"),
-})
+
+if (process.env.NODE_ENV !== "production") {
+   dotenv.config({
+      path: resolve(dirname(fileURLToPath(import.meta.url)), "../../.env"),
+   })
+}
 
 import app from "./app"
 
