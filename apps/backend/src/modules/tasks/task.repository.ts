@@ -26,6 +26,12 @@ export class TaskRepository {
          })
       }
 
+      if (filter?.search_title) {
+         data = filterFn(data, "title", (value) => {
+            return value.toLowerCase().includes(filter.search_title)
+         })
+      }
+
       if (filter?.status) {
          data = filterFn(data, "status", (value) => value == filter.status)
          Object.assign(meta, { status: filter.status })
@@ -92,8 +98,8 @@ export class TaskRepository {
       return {
          data: null,
          meta: {
-            message: "Task deleted."
-         }
+            message: "Task deleted.",
+         },
       }
    }
 }

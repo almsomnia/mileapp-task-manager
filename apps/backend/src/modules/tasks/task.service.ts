@@ -10,6 +10,7 @@ export class TaskService {
          sort_key: query?.sort_key,
          sort_direction: query?.sort_dir,
          status: query?.status,
+         search_title: query?.search_title,
          page: query?.page && Number(query.page ?? 0),
          per_page: query?.per_page && Number(query.per_page ?? 0),
       }
