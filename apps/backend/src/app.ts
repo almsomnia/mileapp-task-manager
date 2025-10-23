@@ -2,10 +2,11 @@ import express from "express"
 import cors from "cors"
 import { moduleRouter } from "./modules"
 import { errorHandler } from "./middlewares/errorHandler"
+import { corsOptions } from "./config/cors/options"
 
 const app = express()
 
-app.use(cors())
+app.use(cors(corsOptions))
 app.use(express.json())
 
 // Module registration
