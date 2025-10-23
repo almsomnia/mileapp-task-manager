@@ -8,7 +8,8 @@
       "web:dev": "pnpm -F frontend dev",
       "web:build": "pnpm -F frontend build",
       "server:dev": "pnpm -F backend dev",
-      "server:test": "pnpm -F backend test"
+      "server:test": "pnpm -F backend test",
+      "server:start": "pnpm -F backend start"
    },
    "keywords": [],
    "author": "",
