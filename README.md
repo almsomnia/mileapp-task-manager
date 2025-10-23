@@ -110,7 +110,7 @@ When a model changes, both layers update automatically via TypeScript inference,
 
 - Uses Jest for backend unit testing.
 
-- Mock tests simulate repository logic for predictable behavior without external dependencias.
+- Mock tests simulate repository logic for predictable behavior without external dependenciss.
 
 This ensures that modules behave correctly and isolates logic to improve reliability.
 
@@ -151,3 +151,67 @@ This ensures that modules behave correctly and isolates logic to improve reliabi
    - Clear module boundaries make it easy to integrate real databases.
 
    - Monorepo allows effortless addition of new packages.
+
+## DB Indexes Motivation
+
+> Mock DB indexes available at `./apps/backend/src/config/db/indexes.ts`
+
+The index definitions are designed to reflect real-world optimization strategies based on the query patterns from this application.
+
+### Users Indexes
+
+1. `{ email: 1 }` — Unique User Email Index
+
+   Each user in the system must have a unique email for authentication and identification.
+
+   A unique index ensures:
+
+   - No duplicate user records
+
+   - Fast lookup during login or user verification
+
+   - Enforcement of data integrity at the database level
+
+### Tasks Indexes
+
+1. `{ id: 1 }` — Unique Task ID Index
+
+   Each task record is identified by a unique ID using `uuid`
+
+   Indexing it ensures:
+
+   - Quick direct access when fetching or updating a specific task.
+
+   - Enforced uniqueness across the dataset.
+
+2. `{ status: 1, due_date: -1 }` — Compound Index for Filtering & Sorting
+
+   Most task list operations typically involve:
+
+   - Filtering by `status`
+
+   - Soring by `due_date`
+
+   By combining both fields into a compound index, MongoDB can:
+
+   - Efiiciently handle queries like:
+      ```js
+      db.tasks.find({ status: "TODO" }).sort({ due_date: -1 })
+      ```
+
+   - Reduce in-memory sort cost and improve response time.
+
+3. `{ created_at: 1 }` — Sorting index (Optional)
+
+   While not always required, many endpoints or UIs display tasks in chronological order.
+
+   Creating an index on `created_at` improves Query performance for sorting or pagination.
+
+4. `{ title: "text" }` — Full-Text Search Index (Optional)
+
+   Provides a simple text search capability for task titles.
+
+   This index supports queries like:
+   ```js
+   db.tasks.find({ $text: { $search: "meeting" } })
+   ```
