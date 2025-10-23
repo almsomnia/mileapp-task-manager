@@ -40,6 +40,9 @@ importers:
       tsx:
         specifier: ^4.20.6
         version: 4.20.6
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
       zod:
         specifier: 'catalog:'
         version: 4.1.12
@@ -77,9 +80,6 @@ importers:
       ts-node:
         specifier: ^10.9.2
         version: 10.9.2(@types/node@22.18.12)(typescript@5.9.3)
-      typescript:
-        specifier: 'catalog:'
-        version: 5.9.3
       uuid:
         specifier: 'catalog:'
         version: 13.0.0
