@@ -148,7 +148,7 @@ function setSortingStrategy(field: string) {
          <div class="flex items-center justify-end">
             <CorePagination
                v-model:page="page"
-               :perPage="perPage"
+               v-model:per-page="perPage"
                :total="props.total"
             />
          </div>
