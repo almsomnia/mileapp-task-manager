@@ -13,6 +13,10 @@ export default defineConfig({
          "@": fileURLToPath(new URL("./src", import.meta.url)),
       },
    },
+   // Docker deploy setting
+   preview: {
+      allowedHosts: [".rivaalmero.me"]
+   },
    envDir: "../../",
    envPrefix: [
       "VITE_",
