@@ -12,7 +12,7 @@ async function onLogout() {
 </script>
 
 <template>
-   <header class="bg-base-100 shadow-md h-[64px]">
+   <header class="bg-base-100 shadow-md h-16">
       <div class="container mx-auto xl:max-w-7xl px-4 h-full">
          <div class="flex items-center justify-between h-full">
             <RouterLink to="/">
