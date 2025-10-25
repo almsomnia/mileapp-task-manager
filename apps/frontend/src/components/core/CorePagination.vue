@@ -15,6 +15,7 @@ const page = defineModel<number>("page", { required: true })
 const perPage = defineModel<number>("perPage", { required: true })
 
 const totalPage = computed(() => {
+   if (perPage.value < 1) return 1
    return Math.ceil(props.total / perPage.value)
 })
 </script>
